@@ -144,7 +144,7 @@ crashes into the body, and kill the snake if it does.
 The parameters are the part to check ( **p** ), the position of the previous part checked
 ( **lastx** and **lasty** ), and the position of the head ( **headx**, **heady** ).
 
-Like **checkTouchesPiece**, the function is *recursive*; it depends on itself to check
+Like **checkTouchesPiece**, the function is *recursive*; it depends on itself to move
 the next part of the snake.
 
 ```lua
