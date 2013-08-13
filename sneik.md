@@ -11,8 +11,8 @@ For a blazing introduction to Lua, you might check out
 [Lua in 15 minutes](http://tylerneylon.com/a/learn-lua/), but you should also be able
 to pick it up while you're reading along. Lua is that easy!
 
-Baby steps
-----------
+[Baby steps](sneik.lua)
+-----------------------
 
 To start off, we declare some global variables. Values that "belong together", like
 the pixel size and cherry position are kept in [tables](http://lua-users.org/wiki/TablesTutorial).
@@ -48,8 +48,8 @@ next = {        -- The next position of the snake's head
 isDown = {}     -- This is reserved space that will be used later. :-)
 ```
 
-Getting functional
-------------------
+[Getting functional](sneik.lua#L31)
+-----------------------------------
 
 Next, we will define a bunch of utillity functions.
 
@@ -204,8 +204,8 @@ function moveSnake(h)
 end
 ```
 
-Pushing pixels
---------------
+[Pushing pixels](sneik.lua#L118)
+--------------------------------
 
 The next set of functions will deal with drawing. The first ones up are just
 helpers meant to make the following code shorter and more readable.
@@ -279,8 +279,8 @@ function togglePixelSize()
 end
 ```
 
-Handling input
---------------
+[Handling input](sneik.lua#L172)
+--------------------------------
 
 As you will see later, games are centered around **loops**. Usually there may be
 60 iterations per second, but there may be more (or less). If we wanted to respond
@@ -307,8 +307,8 @@ function wasPressed(k)
 end
 ```
 
-Setting the table(s)
---------------------
+[Setting the table(s)](sneik.lua#L188)
+--------------------------------------
 
 We're nearing the end now, and just need one final helper before we're ready to put it
 all together. This one will create the snake, reset game data and put the cherry in a
@@ -340,8 +340,8 @@ function resetGame()
 end
 ```
 
-Putting it all together
------------------------
+[Putting it all together](sneik.lua#L210)
+-----------------------------------------
 
 All the required pieces are in place. Now we just need to make our game. :-)
 
