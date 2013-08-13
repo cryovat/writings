@@ -21,7 +21,7 @@ cherry = {      -- The position of the cherry
    posy = 0
 }
 
-nextPos = {        -- The next position of the snake's head
+nextPos = {      -- The next position of the snake's head
    posx = 0;
    posy = 0
 }
@@ -234,7 +234,7 @@ function love.update()
    end
    
    -- Based on which arrow keys are down, set the coordinates
-   -- in the global *next* variable so that the snake moves
+   -- in the global *nextPos* variable so that the snake moves
    -- in that direction.
 
    if love.keyboard.isDown("up") then
