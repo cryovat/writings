@@ -21,7 +21,7 @@ cherry = {      -- The position of the cherry
    posy = 0
 }
 
-nextPos = {      -- The next position of the snake's head
+nextPos = {     -- The next position of the snake's head
    posx = 0;
    posy = 0
 }
