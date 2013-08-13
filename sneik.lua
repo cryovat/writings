@@ -1,32 +1,35 @@
 -- This should be called "main.lua" and put in a folder called "sneik".
+-- Run from the parent folder by calling "love sneik" at the command line.
 
-counter = 0
+counter = 0     -- 
+tick = 10       -- How many frames between each logic update (see below)
+dead = false    -- If the player is alive or dead
+curtain = 0     -- The position of the game-over curtain
 
-pixel = {
-   width=10,
-   height=20
+pixel = {       -- Since one pixel is tiny on a modern display, we're going to
+   width=10,    -- scale them up. This keeps track of the pixel width and height
+   height=20    -- for convenience.
 }
 
-field = {
+field = {       -- The size of the game field
    width=40;
    height=30;
 }
 
-cherry = {
+cherry = {      -- The position of the cherry
    posx = 0;
    posy = 0
 }
 
-next = {
+next = {        -- The next position of the snake's head
    posx = 0;
    posy = 0
 }
 
-dead = false
-curtain = 0
-tick = 10
+isDown = {}     -- This is reserved space that will be used later. :-)
 
-isDown = {}
+-- Getting functional
+-- ==================
 
 function die()
    tick = 5
@@ -52,22 +55,23 @@ function checkTouchesPiece(p, posx, posy)
 end
 
 function getRandomPoint()
-   return math.random(0, field.width - 1),math.random(0, field.height - 1)
+   -- math.random(x,y) gives a value between x and y. It is part of
+   -- the Lua standard library.
+   return math.random(0, field.width - 1), math.random(0, field.height - 1)
 end
 
 function moveCherry(h)
 
    local nextx, nexty = getRandomPoint()
 
+   -- This will be inefficient for very big snakes:
    while checkTouchesPiece(h, nextx, nexty) do
       nextx, nexty = getRandomPoint()
    end
 
    cherry.posx = nextx
    cherry.posy = nexty
-
-   print(nextx, nexty)
-
+   
 end
 
 function movePiece(p, lastx, lasty, headx, heady)
@@ -98,8 +102,11 @@ function moveSnake(h)
       h.posx = nextx
       h.posy = nexty
 
-      if h.posx < 0 or h.posx >= field.width or
-	 h.posy < 0 or h.posy >= field.height then
+      if h.posx < 0 or h.posx >= field.width then
+         die()
+      end
+      
+      if h.posy < 0 or h.posy >= field.height then
 	 die()
       end
 
@@ -107,6 +114,9 @@ function moveSnake(h)
    end
 
 end
+
+-- Pushing pixels
+-- ==============
 
 function setColorWhite()
    love.graphics.setColor(255,255,255,255)
@@ -145,6 +155,7 @@ function drawPiece(p)
 end
 
 function setPixelSize()
+   -- Hint: setMode changes the size of the window.
    love.graphics.setMode((field.width + 4) * pixel.width,
 			 (field.height + 4) * pixel.height)
 end
@@ -157,6 +168,25 @@ function togglePixelSize()
    setPixelSize()
 
 end
+
+-- Handling input
+-- ==============
+
+function wasPressed(k)
+
+   if isDown[k] and not love.keyboard.isDown(k) then
+      isDown[k] = false
+      return true
+   elseif love.keyboard.isDown(k) then
+      isDown[k] = true
+   end
+   
+   return false
+
+end
+
+-- Setting the table(s)
+-- ====================
 
 function resetGame()
 
@@ -177,34 +207,35 @@ function resetGame()
 
 end
 
-function wasPressed(k)
-
-   if isDown[k] and not love.keyboard.isDown(k) then
-      isDown[k] = false
-      return true
-   elseif love.keyboard.isDown(k) then
-      isDown[k] = true
-   end
-
-end
+-- Putting it all together
+-- =======================
 
 function love.load()
+   -- Scale the window based on pixel size
    setPixelSize()
+   -- setCaption changes the title of the window
    love.graphics.setCaption("sneik")
+   -- Reset all the data
    resetGame()
 end
 
 function love.update()
 
+   -- "Menu" keys:
+
    if wasPressed("r") then
       resetGame()
       return
    end
-
+   
    if wasPressed("p") then
       togglePixelSize()
       return
    end
+   
+   -- Based on which arrow keys are down, set the coordinates
+   -- in the global *next* variable so that the snake moves
+   -- in that direction.
 
    if love.keyboard.isDown("up") then
       next.posx = 0
@@ -220,13 +251,22 @@ function love.update()
       next.posy = 0
    end
 
+   -- Counter is used to throttle things, so that the game
+   -- doesn't run at unplayable speeds:
+
    if counter < tick then
       counter = counter + 1
    elseif dead then
       counter = 0
+      -- If dead, rop the curtains:
       curtain = math.min(field.height, curtain + 1)
    else
       counter = 0
+      
+      -- If moving the snake resulted in it growing a new
+      -- head, it must mean that it ate a cherry. Move the
+      -- cherry and change the global *head* variable to
+      -- the address of the new head.
       local h =  moveSnake(head)
       if h ~= head then
 	 head = h
@@ -238,16 +278,25 @@ end
 
 function love.draw()
 
+   -- LÖVE operates with an active drawing color.
    setColorWhite()
-
+   
+   -- Draw borders around the game field:
    fillRectangle(1,1, field.width + 2, field.height + 2)
 
+   -- Create a restore point for graphics settings, then
+   -- shift the drawng coordinate system inwards. This is done
+   -- so that the graphics code doesn't need to know about
+   -- the borders.
    love.graphics.push()
    love.graphics.translate(2 * pixel.width, 2 * pixel.height)
-
+   
+   -- Paint the field:
    setColorDarkGreen()
 
    fillRectangle(0, 0, field.width, field.height)
+   
+   -- Then the items:
 
    setColorGreen()
 
@@ -257,10 +306,14 @@ function love.draw()
 
    drawPiece(head)
 
+   -- And the game over curtain:
    setColorGreen()
 
    fillRectangle(0, 0, field.width, curtain)
 
+   -- Finally, "unshift" the coordinate system:
    love.graphics.pop()
 
 end
+
+
