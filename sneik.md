@@ -1,47 +1,78 @@
+A [LÖVE](http://www.love2d.org)ly little Snake clone
+====================================================
+
+This article will show how to make a Snake using [LÖVE](http://www.love2d.org)
+and the [Lua](http://www.lua.org) programming language. It is a guided tour
+through [sneik.lua](sneik.lua), a single file implementation of the game,
+that tries to introduce the engine, the language and some general game programming
+concepts along the way. The article assumes light programming experience.
+
+To start off, we declare some global variables. Values that "belong together", like
+the pixel size and cherry position are kept in [tables](http://lua-users.org/wiki/TablesTutorial).
+
 ```lua
 
-counter = 0
+counter = 0     -- 
+tick = 10       -- How many frames between each logic update (see below)
+dead = false    -- If the player is alive or dead
+curtain = 0     -- The position of the game-over curtain
 
-pixel = {
-   width=10,
-   height=20
+pixel = {       -- Since one pixel is tiny on a modern display, we're going to
+   width=10,    -- scale them up. This keeps track of the pixel width and height
+   height=20    -- for convenience.
 }
 
-field = {
+field = {       -- The size of the game field
    width=40;
    height=30;
 }
 
-cherry = {
+cherry = {      -- The position of the cherry
    posx = 0;
    posy = 0
 }
 
-next = {
+next = {        -- The next position of the snake's head
    posx = 0;
    posy = 0
 }
 
-dead = false
-curtain = 0
-tick = 10
+isDown = {}
+```
 
-isDown = {
-   p = false,
-   r = false
-}
+Next, we need a way to kill the snake if he goes outside the field or crashes into
+himself:
+
+```lua
 
 function die()
    tick = 5
    dead = true
 end
+```
 
+The following function will be used to create a part of the snake. Since the snake
+will grow every time it eats the cherry, we need a way to represent it so that it
+can be any length.
+
+The most convenient way of doing this is making our snake a
+[linked list](http://en.wikipedia.org/wiki/Linked_list). This means that it is the
+responsibility of each part of the snake to know where the next is.
+
+The tail of the snake will know that it has no next bit. In addition to keeping
+track of the next bit, each piece will also keep track of its position:
+
+```lua
 function makePiece(x, y, nxt)
 
    return {posx=x; posy=y; next_bit=nxt}
 
 end
+```
 
+
+
+```lua
 function checkTouchesPiece(p, posx, posy)
 
    if p.posx == posx and p.posy == posy then
