@@ -7,9 +7,9 @@ through [sneik.lua](sneik.lua), a single file implementation of the game,
 that tries to introduce the engine, the language and some general game programming
 concepts along the way. The article assumes some very basic programming experience.
 
-For a blazing introduction to Lua, check out
-[Lua in 15 minutes](http://tylerneylon.com/a/learn-lua/). This text will also cover
-some of the more particular language features.
+For a blazing introduction to Lua, you might check out
+[Lua in 15 minutes](http://tylerneylon.com/a/learn-lua/), but you should also be able
+to pick it up while you're reading along. Lua is that easy!
 
 Baby steps
 ----------
