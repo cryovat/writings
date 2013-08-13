@@ -40,7 +40,7 @@ cherry = {      -- The position of the cherry
    posy = 0
 }
 
-next = {        -- The next position of the snake's head
+nextPos = {     -- The next position of the snake's head
    posx = 0;
    posy = 0
 }
@@ -179,8 +179,8 @@ later.
 ```lua
 function moveSnake(h)
 
-   local nextx = h.posx + next.posx
-   local nexty = h.posy + next.posy
+   local nextx = h.posx + nextPos.posx
+   local nexty = h.posy + nextPos.posy
 
    if nextx == cherry.posx and nexty == cherry.posy then
       return makePiece(nextx, nexty, h)
@@ -328,8 +328,8 @@ function resetGame()
    local p1 = makePiece(5, 6, p2)
    head = makePiece(6, 6, p1)
 
-   next.posx = 1
-   next.posy = 0
+   nextPos.posx = 1
+   nextPos.posy = 0
 
    moveCherry(head)
 
@@ -398,21 +398,21 @@ function love.update()
    end
    
    -- Based on which arrow keys are down, set the coordinates
-   -- in the global *next* variable so that the snake moves
+   -- in the global *nextPos* variable so that the snake moves
    -- in that direction.
 
    if love.keyboard.isDown("up") then
-      next.posx = 0
-      next.posy = -1
+      nextPos.posx = 0
+      nextPos.posy = -1
    elseif love.keyboard.isDown("down") then
-      next.posx = 0
-      next.posy = 1
+      nextPos.posx = 0
+      nextPos.posy = 1
    elseif love.keyboard.isDown("left") then
-      next.posx = -1
-      next.posy = 0
+      nextPos.posx = -1
+      nextPos.posy = 0
    elseif love.keyboard.isDown("right") then
-      next.posx = 1
-      next.posy = 0
+      nextPos.posx = 1
+      nextPos.posy = 0
    end
 
    -- Counter is used to throttle things, so that the game
