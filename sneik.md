@@ -111,6 +111,8 @@ function will show how you catch them.
 
 ```lua
 function getRandomPoint()
+   -- math.random(x,y) gives a value between x and y. It is part of
+   -- the Lua standard library.
    return math.random(0, field.width - 1), math.random(0, field.height - 1)
 end
 ```
@@ -283,7 +285,8 @@ Handling input
 As you will see later, games are centered around **loops**. Usually there may be
 60 iterations per second, but there may be more (or less). If we wanted to respond
 to a key press, we could run our code when the key is down. However, if the user
-held it down for a second, it would be called a lot of times!
+held it down for a second, it would be called a lot of times, and we didn't plan to
+let them launch that many missiles!
 
 The next function and the **isDown** table we set aside at the start helps us keep
 track of when a key has been **pressed**. By pressed, we mean that the key was down
@@ -308,7 +311,13 @@ Setting the table(s)
 --------------------
 
 We're nearing the end now, and just need one final helper before we're ready to put it
-all together.
+all together. This one will create the snake, reset game data and put the cherry in a
+random location.
+
+Notice that there is no **local** in front of **head**. This means that the value is
+assigned to a global variable. It represents the head of our snake. As is very clear
+from the code, there's absolutely no distinction between the head and the rest of the
+snake apart from its being first.
 
 ```lua
 function resetGame()
@@ -329,24 +338,68 @@ function resetGame()
    dead = false
 
 end
+```
 
+Putting it all together
+-----------------------
+
+All the required pieces are in place. Now we just need to make our game. :-)
+
+To get our game working, we will **overwrite** three functions defined by
+[LÔVE](http://www.love2d.org/wiki/love):
+
+ * **love.load** is called once when the game window is ready.
+ * **love.update** is called dozens of times per second when it is time for
+ the game to run its logic.
+ * **love.draw** is called dozens of times per second when it is time for the
+ game to draw all its graphics.
+
+**Update** and **draw** constitute the
+[game loop](http://en.wikipedia.org/wiki/Game_programming#Game_structure).
+Games are commonly structured in this way; as a cycle of reading input from
+the user, responding to the input and changes in the world, and painting graphics
+to show the player what's happening.
+
+There is a distinction between **update** and **draw** for two reasons. For
+one, it encourages a better code structure by keeping logic and graphics
+separate. Secondly, and most importantly, it allows the game engine to be
+more intelligent if things were to slow down. For instance, it could resolve
+to call **update** as often as possible, but limit **draw** to 30 times per
+second. This way, things can remain fluid for the user.
+
+**Load** is pretty trivial:
+
+```lua
 function love.load()
+   -- Scale the window based on pixel size
    setPixelSize()
+   -- setCaption changes the title of the window
    love.graphics.setCaption("sneik")
+   -- Reset all the data
    resetGame()
 end
+```
 
+**Update** is a little more involved, but not a lot:
+
+```lua
 function love.update()
+
+   -- "Menu" keys:
 
    if wasPressed("r") then
       resetGame()
       return
    end
-
+   
    if wasPressed("p") then
       togglePixelSize()
       return
    end
+   
+   -- Based on which arrow keys are down, set the coordinates
+   -- in the global *next* variable so that the snake moves
+   -- in that direction.
 
    if love.keyboard.isDown("up") then
       next.posx = 0
@@ -362,13 +415,22 @@ function love.update()
       next.posy = 0
    end
 
+   -- Counter is used to throttle things, so that the game
+   -- doesn't run at unplayable speeds:
+
    if counter < tick then
       counter = counter + 1
    elseif dead then
       counter = 0
+      -- If dead, rop the curtains:
       curtain = math.min(field.height, curtain + 1)
    else
       counter = 0
+      
+      -- If moving the snake resulted in it growing a new
+      -- head, it must mean that it ate a cherry. Move the
+      -- cherry and change the global *head* variable to
+      -- the address of the new head.
       local h =  moveSnake(head)
       if h ~= head then
 	 head = h
@@ -377,19 +439,32 @@ function love.update()
    end
 
 end
+```
 
+And finally, we draw some pretty graphics:
+
+```lua
 function love.draw()
 
+   -- LÖVE operates with an active drawing color.
    setColorWhite()
-
+   
+   -- Draw borders around the game field:
    fillRectangle(1,1, field.width + 2, field.height + 2)
 
+   -- Create a restore point for graphics settings, then
+   -- shift the drawng coordinate system inwards. This is done
+   -- so that the graphics code doesn't need to know about
+   -- the borders.
    love.graphics.push()
    love.graphics.translate(2 * pixel.width, 2 * pixel.height)
-
+   
+   -- Paint the field:
    setColorDarkGreen()
 
    fillRectangle(0, 0, field.width, field.height)
+   
+   -- Then the items:
 
    setColorGreen()
 
@@ -399,11 +474,31 @@ function love.draw()
 
    drawPiece(head)
 
+   -- And the game over curtain:
    setColorGreen()
 
    fillRectangle(0, 0, field.width, curtain)
 
+   -- Finally, "unshift" the coordinate system:
    love.graphics.pop()
 
 end
 ```
+
+Wrapping up
+-----------
+
+Whew! That was it! Hopefully, reading this taught you a little more about game
+programming, [LÖVE](http://www.love2d.org), [Lua](http://www.lua.org) or the dietary
+preferences of reptiles.
+
+All this code is public domain (or WTFPL, take your pick). Possible tasks based on
+this code could be:
+
+ * Extend the game to support multiple players
+ * Several cherries active at once
+ * Add *anticherries* that make the snake shorter 
+ * Speed up the game as the snake grows longer
+ * Make the snake wrap around the edges of the screen
+ * Add a score counter
+ * Add a menu and high score list
